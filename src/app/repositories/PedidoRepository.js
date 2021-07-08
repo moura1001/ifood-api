@@ -1,12 +1,12 @@
 import database from "../../database";
 
 class PedidoRepository {
-  async insertOne(id_restaurante, id_cliente, tipo_entrega) {
+  async insertOne(id_restaurante, id_cliente, tipo_entrega, endereco_entrega) {
     try {
       const result = await database.client.query(
-        `INSERT INTO pedido(id_restaurante, id_cliente, tipo_entrega) 
-        VALUES ($1, $2, $3) RETURNING *`,
-        [id_restaurante, id_cliente, tipo_entrega]
+        `INSERT INTO pedido(id_restaurante, id_cliente, tipo_entrega, endereco_entrega) 
+        VALUES ($1, $2, $3, $4) RETURNING *`,
+        [id_restaurante, id_cliente, tipo_entrega, endereco_entrega]
       );
 
       console.log(result.rows);

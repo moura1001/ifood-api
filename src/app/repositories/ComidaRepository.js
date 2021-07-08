@@ -78,6 +78,7 @@ class ComidaRepository {
         INNER JOIN comida ON comida.id = detalhes_pedido.id_comida
         INNER JOIN pedido ON pedido.id = detalhes_pedido.id_pedido
         INNER JOIN usuario ON comida.id_restaurante = usuario.id
+        WHERE usuario.aberto
         GROUP BY id_comida, comida.nome, usuario.nome, usuario.id
         ORDER BY QuantidadeDeComida DESC;
       `);
@@ -117,7 +118,7 @@ class ComidaRepository {
         SELECT comida.nome as comida_nome, * FROM comida
         INNER JOIN usuario
         ON comida.id_restaurante = usuario.id  
-        WHERE comida.nome LIKE $1
+        WHERE usuario.aberto AND lower($1) SIMILAR TO lower(concat('%(', array_to_string(string_to_array(usuario.nome, ' '), '|'), '|', array_to_string(string_to_array(comida.nome, ' '), '|'),'|', array_to_string(string_to_array(comida.descricao, ' '), '|'), ')%'))
       `,
         [`%${nome_comida}%`]
       );
@@ -134,7 +135,7 @@ class ComidaRepository {
         `
         SELECT *, usuario.nome as nome_restaurante, comida.nome as nome_comida FROM comida
         INNER JOIN usuario ON usuario.id = comida.id_restaurante
-        WHERE promocao = true
+        WHERE usuario.aberto AND comida.promocao
       `
       );
 

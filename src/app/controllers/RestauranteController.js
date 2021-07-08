@@ -5,7 +5,7 @@ class RestauranteController {
   async store(req, res) {
     const { nome, provedor, senha, email, endereco, categoria } = req.body;
 
-    const status = "aberto";
+    const aberto = true;
     const tipo_entrega = "rapida";
     const emailExists = await UsuarioRepository.verifyExistingEmail(email);
 
@@ -23,7 +23,7 @@ class RestauranteController {
       email,
       endereco,
       categoria,
-      status,
+      aberto,
       tipo_entrega,
     ]);
 
@@ -157,6 +157,18 @@ class RestauranteController {
       const restaurante = await RestauranteRepository.updateEntrega(
         req.body.id_restaurante,
         req.body.tipo_entrega
+      );
+
+      return res.json({ restaurante });
+    } catch (err) {
+      return res.json({ error: err });
+    }
+  }
+
+  async updateStatus(req, res) {
+    try {
+      const restaurante = await RestauranteRepository.updateStatus(
+        req.body.id_restaurante
       );
 
       return res.json({ restaurante });

@@ -1,24 +1,31 @@
 import ComidaRepository from "../repositories/ComidaRepository";
 import PedidoRepository from "../repositories/PedidoRepository";
+import RestauranteRepository from "../repositories/RestauranteRepository";
 
 class PedidoController {
   async store(req, res) {
-    const { id_restaurante, id_cliente, tipo_entrega } = req.body;
+    const { id_restaurante, id_cliente, tipo_entrega, endereco_entrega } = req.body;
     console.log("req pedido");
     console.log(req.body);
+    const isOpen = await RestauranteRepository.verifyStatus(id_restaurante);
 
     if (!id_restaurante) {
-      res.status(404).json({ error: "É necessário escolher um restaurante" });
+      return res.status(404).json({ error: "É necessário escolher um restaurante" });
     }
 
     if (!id_cliente) {
-      res.status(404).json({ error: "É necessário ter um cliente" });
+      return res.status(404).json({ error: "É necessário ter um cliente" });
+    }
+
+    if(!isOpen){
+      return res.json({ error: "Restaurante fechado. Não é possível finalizar o pedido." });
     }
 
     const pedido = await PedidoRepository.insertOne(
       id_restaurante,
       id_cliente,
-      tipo_entrega
+      tipo_entrega,
+      endereco_entrega
     );
 
     return res.json({ pedido });

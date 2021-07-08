@@ -9,7 +9,7 @@ class RestauranteRepository {
   async criarRestaurante(restaurante) {
     try {
       const result = await database.client.query(
-        `INSERT INTO usuario(nome, provedor, senha, email, endereco, categoria, status, tipo_entrega) 
+        `INSERT INTO usuario(nome, provedor, senha, email, endereco, categoria, aberto, tipo_entrega) 
         VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`,
         restaurante
       );
@@ -50,7 +50,7 @@ class RestauranteRepository {
     try {
       const result = await database.client.query(`
       SELECT * FROM usuario
-      WHERE tipo_entrega = 'gratis'
+      WHERE usuario.aberto AND tipo_entrega = 'gratis'
       `);
 
       const restaurantes = result.rows.filter((usuario) => usuario.provedor);
@@ -65,7 +65,7 @@ class RestauranteRepository {
     try {
       const result = await database.client.query(`
       SELECT * FROM usuario
-      WHERE tipo_entrega = 'rapida'
+      WHERE usuario.aberto AND tipo_entrega = 'rapida'
       `);
 
       const restaurantes = result.rows.filter((usuario) => usuario.provedor);
@@ -103,6 +103,8 @@ class RestauranteRepository {
       `,
         [palavra]
       );
+
+      return result.rows;
     } catch (err) {
       return err;
     }
@@ -225,13 +227,14 @@ class RestauranteRepository {
     try {
       const result = await database.client.query(
         `
-        SELECT usuario.id, 
+        SELECT usuario.id,
         usuario.nome,
         usuario.tipo_entrega,
-         MAX(preco) AS Maior FROM usuario 
-        INNER JOIN comida ON usuario.id = comida.id_restaurante 
+        MAX(preco) AS Maior FROM usuario 
+        INNER JOIN comida ON usuario.id = comida.id_restaurante
+        WHERE usuario.aberto
         GROUP BY usuario.id
-        HAVING MAX(preco) <= '10.00';
+        HAVING MAX(preco) <= 10.0;
       `
       );
       return result.rows;
@@ -251,6 +254,36 @@ class RestauranteRepository {
         [tipo_entrega, id_restaurante]
       );
       return result.rows;
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async updateStatus(id_restaurante) {
+    try {
+      const result = await database.client.query(
+        `
+        UPDATE usuario
+        SET aberto = NOT aberto
+        WHERE id = $1;
+      `,
+        [id_restaurante]
+      );
+      return result.rows;
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async verifyStatus(id_restaurante) {
+    try {
+      const result = await database.client.query(
+        `SELECT aberto FROM usuario
+        WHERE id = $1`,
+        [id_restaurante]
+      );
+
+      return result.rows[0].aberto;
     } catch (err) {
       return err;
     }

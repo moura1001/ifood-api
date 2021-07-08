@@ -38,6 +38,7 @@ routes.get(
 );
 routes.get("/restaurante/precomedio", RestauranteController.precoMedio);
 routes.put("/restaurante/tipoentrega", RestauranteController.updateEntrega);
+routes.put("/restaurante/status", RestauranteController.updateStatus);
 routes.get(
   "/restaurante/comidamaispedida",
   RestauranteController.comidaMaisPedia
